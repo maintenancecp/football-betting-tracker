@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>บันทึกการเดิมพันฟุตบอล</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body class="dark">
+
+  <!-- หน้า Login -->
+  <div id="loginPage" class="login-page">
+    <h2>เข้าสู่ระบบ</h2>
+    <input type="email" id="loginEmail" placeholder="อีเมล" />
+    <input type="password" id="loginPassword" placeholder="รหัสผ่าน" />
+    <button onclick="login()">เข้าสู่ระบบ</button>
+    <button onclick="register()">สมัครสมาชิก</button>
+    <p id="loginError" class="error-msg"></p>
+  </div>
+
+  <!-- เนื้อหาหลักซ่อนก่อน -->
+  <div class="container" id="appContainer" style="display:none;">
+    <aside id="menu">
+      <h2>♠︎♥︎♦︎♣︎♠︎♥︎♦︎♣︎</h2>
+      <button onclick="showPage('deposit')">เติมเงิน</button>
+      <button onclick="showPage('withdraw')">ถอนเงิน</button>
+      <button onclick="showPage('bet')">เดิมพัน</button>
+      <button onclick="showPage('all')">รายการทั้งหมด</button>
+      <button onclick="showPage('summary')">สรุปผล</button>
+      <button onclick="logout()" style="background:#f44336;margin-top:20px;">ออกจากระบบ</button>
+    </aside>
+
+    <main id="content">
+      <h1>No Pain No Gain</h1>
+
+      <div id="deposit" class="page">
+        <h2>เติมเงิน</h2>
+        <input type="number" id="depositInput" placeholder="จำนวนเงิน" />
+        <button onclick="deposit()">ยืนยันการเติมเงิน</button>
+      </div>
+
+      <div id="withdraw" class="page">
+        <h2>ถอนเงิน</h2>
+        <input type="number" id="withdrawInput" placeholder="จำนวนเงิน" />
+        <button onclick="withdraw()">ยืนยันการถอนเงิน</button>
+      </div>
+
+      <div id="bet" class="page">
+        <h2>เดิมพัน</h2>
+        <label>วันที่ <input type="date" id="betDate" /></label>
+        <label>ทีมที่เดิมพัน <input type="text" id="betTeam" /></label>
+        <label>ค่าน้ำ <input type="number" step="0.01" id="betOdd" /></label>
+        <label>จำนวนเงินเดิมพัน <input type="number" id="betAmount" /></label>
+        <button onclick="placeBet()">เพิ่มรายการเดิมพัน</button>
+      </div>
+
+      <div id="all" class="page">
+        <h2>รายการทั้งหมด</h2>
+        <ul id="list"></ul>
+        <div id="paginationControls"></div>
+      </div>
+
+      <div id="summary" class="page">
+        <h2>สรุปผล</h2>
+        <p class="summary-row"><span>เติมเงินรวม:</span> <span id="deposited">0.00</span> บาท</p>
+        <p class="summary-row"><span>ถอนเงิน:</span> <span id="withdrawn">0.00</span> บาท</p>
+        <p class="summary-row"><span>ยอดเดิมพัน:</span> <span id="totalAmount">0.00</span> บาท</p>
+        <p class="summary-row"><span>ยอดคงเหลือ:</span> <span id="winAmount">0.00</span> บาท</p>
+        <p class="summary-row"><span>ขาดทุน:</span> <span id="loseAmount">0.00</span> บาท</p>
+        <p class="summary-row"><span>กำไรสุทธิ:</span> <span id="net">0.00</span> บาท</p>
+        <p class="summary-row"><span>ผลต่างถอน/ทุน:</span> <span id="realProfit">0.00</span> บาท</p>
+        <p class="summary-row"><span>ยอดคงเหลือในบัญชี:</span> <span id="balance">0.00</span> บาท</p>
+        <canvas id="pieChart" width="150" height="150"></canvas>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
