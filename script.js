@@ -1,14 +1,55 @@
-// Firebase config (แก้ไขให้ตรงกับโปรเจกต์ของคุณ)
+// Firebase import & config
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+// ใส่ config โปรเจค Firebase ของคุณให้ถูกต้อง
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyASlYaxOMg36n5j6ffqYRntJ5v0lwaQSzI",
+  authDomain: "test-progarm.firebaseapp.com",
+  projectId: "test-progarm",
+  storageBucket: "test-progarm.firebasestorage.app",
+  messagingSenderId: "967694649194",
+  appId: "1:967694649194:web:b9df00e355a27a90a7c713",
+  measurementId: "G-855F2GCTLX"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// ตรวจสอบสถานะการล็อกอิน แสดงผล UI
+onAuthStateChanged(auth, user => {
+  document.getElementById("loginPage").style.display = user ? "none" : "block";
+  document.getElementById("appContainer").style.display = user ? "flex" : "none";
+});
+
+// ฟังก์ชันล็อกอิน
+window.login = async function () {
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    document.getElementById("loginError").textContent = "";
+  } catch (err) {
+    document.getElementById("loginError").textContent = err.message;
+  }
+};
+
+// ฟังก์ชันสมัครสมาชิก
+window.register = async function () {
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    document.getElementById("loginError").textContent = "";
+  } catch (err) {
+    document.getElementById("loginError").textContent = err.message;
+  }
+};
+
+// ฟังก์ชันออกจากระบบ
+window.logout = function () {
+  signOut(auth);
+};
 
 // ตัวแปรเก็บข้อมูล
 let records = [];
@@ -18,69 +59,14 @@ let withdrawals = 0;
 const itemsPerPage = 5;
 let currentPage = 1;
 
-// elements
-const loginPage = document.getElementById("loginPage");
-const appContainer = document.getElementById("appContainer");
-const loginError = document.getElementById("loginError");
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    loginPage.style.display = "none";
-    appContainer.style.display = "flex";
-    showPage("deposit");
-    updateSummary();
-    renderPagination();
-    renderList();
-    setupPieChart();
-  } else {
-    loginPage.style.display = "block";
-    appContainer.style.display = "none";
-  }
+// หน้าเว็บโหลดเสร็จ เรียกฟังก์ชัน
+document.addEventListener("DOMContentLoaded", () => {
+  showPage("deposit");
+  updateSummary();
+  renderPagination();
+  renderList();
+  setupPieChart();
 });
-
-// Login
-function login() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
-
-  loginError.textContent = "";
-  if (!email || !password) {
-    loginError.textContent = "กรุณากรอกอีเมลและรหัสผ่าน";
-    return;
-  }
-
-  auth.signInWithEmailAndPassword(email, password)
-    .catch(error => {
-      loginError.textContent = error.message;
-    });
-}
-
-// Register
-function register() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
-
-  loginError.textContent = "";
-  if (!email || !password) {
-    loginError.textContent = "กรุณากรอกอีเมลและรหัสผ่าน";
-    return;
-  }
-
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(() => {
-      loginError.style.color = "#4caf50";
-      loginError.textContent = "สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ";
-    })
-    .catch(error => {
-      loginError.style.color = "#f44336";
-      loginError.textContent = error.message;
-    });
-}
-
-// Logout
-function logout() {
-  auth.signOut();
-}
 
 function showPage(page) {
   document.querySelectorAll(".page").forEach(div => {
@@ -247,90 +233,71 @@ function renderPagination() {
   const totalPages = Math.ceil(records.length / itemsPerPage);
   if (totalPages <= 1) return;
 
-  for(let i=1; i<=totalPages; i++) {
+  for(let i = 1; i <= totalPages; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
-    if (i === currentPage) btn.style.textDecoration = "underline";
+    if(i === currentPage) {
+      btn.style.fontWeight = "bold";
+      btn.style.textDecoration = "underline";
+    }
     btn.onclick = () => {
       currentPage = i;
       renderList();
       renderPagination();
-    }
+    };
     controls.appendChild(btn);
   }
 }
 
 function updateSummary() {
-  let totalBetAmount = 0;
-  let totalWinWithCapital = 0;
-  let realWinProfit = 0;
-  let totalLose = 0;
-  let totalBetUsed = 0;
+  let betTotal = 0, betWin = 0, betLose = 0;
 
   records.forEach(r => {
     if (r.type === "bet") {
-      totalBetAmount += r.amount;
-      if (r.status === "ชนะ") {
-        totalWinWithCapital += r.amount * r.odd;
-        realWinProfit += r.amount * (r.odd - 1);
-        totalBetUsed += r.amount;
-      } else if (r.status === "แพ้") {
-        totalLose += r.amount;
-        totalBetUsed += r.amount;
-      }
+      betTotal += r.amount;
+      if (r.status === "ชนะ") betWin += r.amount * r.odd;
+      if (r.status === "แพ้") betLose += r.amount;
     }
   });
 
-  // หักลบขาดทุนจากกำไรก่อน
-  let totalLoseShown = totalLose;
-  let netProfit = realWinProfit - totalLose;
-  if (netProfit >= 0) {
-    totalLoseShown = 0;
-  } else {
-    netProfit = 0;
-    totalLoseShown = totalLose - realWinProfit;
-  }
-
-  let balance = (deposits - withdrawals - totalBetUsed) + totalWinWithCapital;
-  const realProfit = deposits - withdrawals;
+  const balance = deposits - withdrawals - betLose + betWin;
+  const netProfit = betWin - betLose;
+  const realProfit = netProfit - (deposits - withdrawals);
 
   document.getElementById("deposited").textContent = deposits.toFixed(2);
   document.getElementById("withdrawn").textContent = withdrawals.toFixed(2);
-  document.getElementById("totalAmount").textContent = totalBetAmount.toFixed(2);
-  document.getElementById("winAmount").textContent = totalWinWithCapital.toFixed(2);
-  document.getElementById("loseAmount").textContent = totalLoseShown.toFixed(2);
+  document.getElementById("totalAmount").textContent = betTotal.toFixed(2);
+  document.getElementById("winAmount").textContent = betWin.toFixed(2);
+  document.getElementById("loseAmount").textContent = betLose.toFixed(2);
   document.getElementById("net").textContent = netProfit.toFixed(2);
   document.getElementById("realProfit").textContent = realProfit.toFixed(2);
   document.getElementById("balance").textContent = balance.toFixed(2);
 
-  updatePieChart(netProfit, totalLoseShown);
-  document.getElementById("winAmount").parentNode.style.display = "none";
+  updatePieChart(betWin, betLose, deposits - withdrawals);
 }
 
+// --------- Chart.js ---------
 let pieChart;
+
 function setupPieChart() {
-  if (pieChart) return; // สร้างแค่ครั้งเดียว
-  const ctx = document.getElementById('pieChart').getContext('2d');
+  const ctx = document.getElementById("pieChart").getContext("2d");
   pieChart = new Chart(ctx, {
-    type: 'doughnut',
+    type: "pie",
     data: {
-      labels: ['กำไรรวมทุน', 'ขาดทุน'],
+      labels: ["กำไรจากเดิมพัน", "ขาดทุนจากเดิมพัน", "เงินทุนสุทธิ"],
       datasets: [{
-        data: [0, 0],
-        backgroundColor: ['#4caf50', '#f44336'],
-      }]
+        label: "สัดส่วนเงิน",
+        data: [0, 0, 0],
+        backgroundColor: ["#4caf50", "#f44336", "#ffeb3b"],
+      }],
     },
     options: {
-      responsive: true,
-      plugins: {
-        legend: { position: 'bottom' },
-      }
-    }
+      responsive: false,
+    },
   });
 }
 
-function updatePieChart(win, lose) {
-  if (!pieChart) return;
-  pieChart.data.datasets[0].data = [win, lose];
+function updatePieChart(win, lose, netDeposit) {
+  pieChart.data.datasets[0].data = [win, lose, netDeposit];
   pieChart.update();
 }
