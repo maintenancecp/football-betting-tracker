@@ -7,7 +7,7 @@ let currentPage = 1;
 
 auth.onAuthStateChanged(user => {
   document.getElementById("loginPage").style.display = user ? "none" : "block";
-  document.getElementById("appContainer").style.display = user ? "flex" : "none";
+  document.getElementById("appContainer").style.display = user ? "block" : "none";
   if (user) {
     setupPieChart();
     updateSummary();
@@ -21,24 +21,16 @@ function login() {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
   auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      document.getElementById("loginError").textContent = "";
-    })
-    .catch(err => {
-      document.getElementById("loginError").textContent = err.message;
-    });
+    .then(() => document.getElementById("loginError").textContent = "")
+    .catch(err => document.getElementById("loginError").textContent = err.message);
 }
 
 function register() {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
   auth.createUserWithEmailAndPassword(email, password)
-    .then(() => {
-      document.getElementById("loginError").textContent = "";
-    })
-    .catch(err => {
-      document.getElementById("loginError").textContent = err.message;
-    });
+    .then(() => document.getElementById("loginError").textContent = "")
+    .catch(err => document.getElementById("loginError").textContent = err.message);
 }
 
 function logout() {
