@@ -5,16 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Football Betting Tracker</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
   <div id="loginPage">
     <h2>เข้าสู่ระบบ</h2>
-    <input id="loginEmail" type="email" placeholder="อีเมล" />
-    <input id="loginPassword" type="password" placeholder="รหัสผ่าน" />
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
     <button onclick="login()">เข้าสู่ระบบ</button>
     <button onclick="register()">สมัครสมาชิก</button>
-    <div id="loginError" style="color:red;"></div>
+    <p id="loginError" style="color:red;"></p>
   </div>
 
   <div id="appContainer" style="display: none;">
