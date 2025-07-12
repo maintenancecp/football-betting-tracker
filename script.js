@@ -1,23 +1,11 @@
-// Firebase import & config
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyASlYaxOMg36n5j6ffqYRntJ5v0lwaQSzI",
-  authDomain: "test-progarm.firebaseapp.com",
-  projectId: "test-progarm",
-  storageBucket: "test-progarm.firebasestorage.app",
-  messagingSenderId: "967694649194",
-  appId: "1:967694649194:web:b9df00e355a27a90a7c713",
-  measurementId: "G-855F2GCTLX"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
 let pieChart;
+let records = [];
+let deposits = 0;
+let withdrawals = 0;
+const itemsPerPage = 5;
+let currentPage = 1;
 
-onAuthStateChanged(auth, user => {
+auth.onAuthStateChanged(user => {
   document.getElementById("loginPage").style.display = user ? "none" : "block";
   document.getElementById("appContainer").style.display = user ? "flex" : "none";
   if (user) {
@@ -25,44 +13,39 @@ onAuthStateChanged(auth, user => {
     updateSummary();
     renderPagination();
     renderList();
-    window.showPage("deposit");
+    showPage("deposit");
   }
 });
 
-window.login = async function () {
+function login() {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    document.getElementById("loginError").textContent = "";
-  } catch (err) {
-    document.getElementById("loginError").textContent = err.message;
-  }
-};
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      document.getElementById("loginError").textContent = "";
+    })
+    .catch(err => {
+      document.getElementById("loginError").textContent = err.message;
+    });
+}
 
-window.register = async function () {
+function register() {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    document.getElementById("loginError").textContent = "";
-  } catch (err) {
-    document.getElementById("loginError").textContent = err.message;
-  }
-};
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => {
+      document.getElementById("loginError").textContent = "";
+    })
+    .catch(err => {
+      document.getElementById("loginError").textContent = err.message;
+    });
+}
 
-window.logout = function () {
-  signOut(auth);
-};
+function logout() {
+  auth.signOut();
+}
 
-let records = [];
-let deposits = 0;
-let withdrawals = 0;
-
-const itemsPerPage = 5;
-let currentPage = 1;
-
-window.showPage = function(page) {
+function showPage(page) {
   document.querySelectorAll(".page").forEach(div => {
     div.classList.remove("active");
   });
@@ -75,9 +58,9 @@ window.showPage = function(page) {
   if (page === "summary") {
     updateSummary();
   }
-};
+}
 
-window.deposit = function () {
+function deposit() {
   const input = document.getElementById("depositInput");
   let amount = parseFloat(input.value);
   if (isNaN(amount) || amount <= 0) {
@@ -96,9 +79,9 @@ window.deposit = function () {
   renderPagination();
   updateSummary();
   alert("เติมเงินเรียบร้อย");
-};
+}
 
-window.withdraw = function () {
+function withdraw() {
   const input = document.getElementById("withdrawInput");
   let amount = parseFloat(input.value);
   if (isNaN(amount) || amount <= 0) {
@@ -117,9 +100,9 @@ window.withdraw = function () {
   renderPagination();
   updateSummary();
   alert("ถอนเงินเรียบร้อย");
-};
+}
 
-window.placeBet = function () {
+function placeBet() {
   const date = document.getElementById("betDate").value;
   const team = document.getElementById("betTeam").value.trim();
   const odd = parseFloat(document.getElementById("betOdd").value);
@@ -148,7 +131,7 @@ window.placeBet = function () {
   renderPagination();
   updateSummary();
   alert("เพิ่มเดิมพันเรียบร้อย");
-};
+}
 
 function changeStatus(index, selectElem) {
   records[index].status = selectElem.value;
@@ -160,7 +143,7 @@ function renderList() {
   const listEl = document.getElementById("list");
   listEl.innerHTML = "";
 
-  const startIndex = (currentPage -1) * itemsPerPage;
+  const startIndex = (currentPage - 1) * itemsPerPage;
   const pageItems = records.slice(startIndex, startIndex + itemsPerPage);
 
   pageItems.forEach((item, i) => {
@@ -226,10 +209,10 @@ function renderPagination() {
   const totalPages = Math.ceil(records.length / itemsPerPage);
   if (totalPages <= 1) return;
 
-  for(let i = 1; i <= totalPages; i++) {
+  for (let i = 1; i <= totalPages; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
-    if(i === currentPage) {
+    if (i === currentPage) {
       btn.style.fontWeight = "bold";
       btn.style.textDecoration = "underline";
     }
