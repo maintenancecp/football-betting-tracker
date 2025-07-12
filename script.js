@@ -1,17 +1,12 @@
+// Firebase import & config
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyASlYaxOMg36n5j6ffqYRntJ5v0lwaQSzI",
   authDomain: "test-progarm.firebaseapp.com",
   projectId: "test-progarm",
-  storageBucket: "test-progarm.appspot.com",
+  storageBucket: "test-progarm.firebasestorage.app",
   messagingSenderId: "967694649194",
   appId: "1:967694649194:web:b9df00e355a27a90a7c713",
   measurementId: "G-855F2GCTLX"
@@ -20,54 +15,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// ตัวแปรเก็บข้อมูล
-let records = [];
-let deposits = 0;
-let withdrawals = 0;
 let pieChart;
-const itemsPerPage = 5;
-let currentPage = 1;
 
 onAuthStateChanged(auth, user => {
-  const loginPage = document.getElementById("loginPage");
-  const appContainer = document.getElementById("appContainer");
+  document.getElementById("loginPage").style.display = user ? "none" : "block";
+  document.getElementById("appContainer").style.display = user ? "flex" : "none";
   if (user) {
-    loginPage.style.display = "none";
-    appContainer.style.display = "flex";
-    showPage("deposit");
+    setupPieChart();
     updateSummary();
     renderPagination();
     renderList();
-    setupPieChart();
-  } else {
-    loginPage.style.display = "block";
-    appContainer.style.display = "none";
+    window.showPage("deposit");
   }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll("aside button").forEach(button => {
-    button.addEventListener("click", () => {
-      const page = button.textContent.trim();
-      switch (page) {
-        case "เติมเงิน":
-          showPage("deposit"); break;
-        case "ถอนเงิน":
-          showPage("withdraw"); break;
-        case "เดิมพัน":
-          showPage("bet"); break;
-        case "รายการทั้งหมด":
-          showPage("all"); break;
-        case "สรุปผล":
-          showPage("summary"); break;
-      }
-    });
-  });
-
-  document.querySelector('button[onclick="logout()"]').addEventListener("click", () => logout());
-  document.getElementById("depositInput").nextElementSibling.addEventListener("click", deposit);
-  document.getElementById("withdrawInput").nextElementSibling.addEventListener("click", withdraw);
-  document.getElementById("betAmount").nextElementSibling.addEventListener("click", placeBet);
 });
 
 window.login = async function () {
@@ -96,7 +55,14 @@ window.logout = function () {
   signOut(auth);
 };
 
-function showPage(page) {
+let records = [];
+let deposits = 0;
+let withdrawals = 0;
+
+const itemsPerPage = 5;
+let currentPage = 1;
+
+window.showPage = function(page) {
   document.querySelectorAll(".page").forEach(div => {
     div.classList.remove("active");
   });
@@ -109,9 +75,9 @@ function showPage(page) {
   if (page === "summary") {
     updateSummary();
   }
-}
+};
 
-function deposit() {
+window.deposit = function () {
   const input = document.getElementById("depositInput");
   let amount = parseFloat(input.value);
   if (isNaN(amount) || amount <= 0) {
@@ -130,9 +96,9 @@ function deposit() {
   renderPagination();
   updateSummary();
   alert("เติมเงินเรียบร้อย");
-}
+};
 
-function withdraw() {
+window.withdraw = function () {
   const input = document.getElementById("withdrawInput");
   let amount = parseFloat(input.value);
   if (isNaN(amount) || amount <= 0) {
@@ -151,9 +117,9 @@ function withdraw() {
   renderPagination();
   updateSummary();
   alert("ถอนเงินเรียบร้อย");
-}
+};
 
-function placeBet() {
+window.placeBet = function () {
   const date = document.getElementById("betDate").value;
   const team = document.getElementById("betTeam").value.trim();
   const odd = parseFloat(document.getElementById("betOdd").value);
@@ -182,7 +148,7 @@ function placeBet() {
   renderPagination();
   updateSummary();
   alert("เพิ่มเดิมพันเรียบร้อย");
-}
+};
 
 function changeStatus(index, selectElem) {
   records[index].status = selectElem.value;
@@ -217,13 +183,15 @@ function renderList() {
         option.textContent = statusOption;
         if (statusOption === item.status) option.selected = true;
         select.appendChild(option);
+        select.classList.add("status-select");
+        if (item.status === "ชนะ") {
+          select.style.backgroundColor = "#336600";
+        } else if (item.status === "แพ้") {
+          select.style.backgroundColor = "#990000";
+        } else {
+          select.style.backgroundColor = "#FFD700";
+        }
       });
-      select.classList.add("status-select");
-      select.style.backgroundColor =
-        item.status === "ชนะ" ? "#336600" :
-        item.status === "แพ้" ? "#990000" :
-        "#FFD700";
-
       select.onchange = () => changeStatus(globalIndex, select);
       li.innerHTML = content;
       li.appendChild(select);
@@ -247,6 +215,7 @@ function renderList() {
       }
     };
     li.appendChild(deleteBtn);
+
     listEl.appendChild(li);
   });
 }
@@ -297,7 +266,7 @@ function updateSummary() {
   document.getElementById("realProfit").textContent = realProfit.toFixed(2);
   document.getElementById("balance").textContent = balance.toFixed(2);
 
-  if (pieChart) updatePieChart(betWin, betLose, deposits - withdrawals);
+  updatePieChart(betWin, betLose, deposits - withdrawals);
 }
 
 function setupPieChart() {
@@ -312,11 +281,14 @@ function setupPieChart() {
         backgroundColor: ["#4caf50", "#f44336", "#ffeb3b"],
       }],
     },
-    options: { responsive: false },
+    options: {
+      responsive: false,
+    },
   });
 }
 
 function updatePieChart(win, lose, netDeposit) {
+  if (!pieChart || !pieChart.data || !pieChart.data.datasets) return;
   pieChart.data.datasets[0].data = [win, lose, netDeposit];
   pieChart.update();
 }
