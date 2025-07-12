@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupPieChart();
 });
 
-function showPage(page) {
+window.showPage = function(page) {
   document.querySelectorAll(".page").forEach(div => {
     div.classList.remove("active");
   });
@@ -83,7 +83,7 @@ function showPage(page) {
   }
 }
 
-function deposit() {
+window.deposit = function () {
   const input = document.getElementById("depositInput");
   let amount = parseFloat(input.value);
   if (isNaN(amount) || amount <= 0) {
@@ -104,7 +104,7 @@ function deposit() {
   alert("เติมเงินเรียบร้อย");
 }
 
-function withdraw() {
+window.withdraw = function () {
   const input = document.getElementById("withdrawInput");
   let amount = parseFloat(input.value);
   if (isNaN(amount) || amount <= 0) {
@@ -125,7 +125,7 @@ function withdraw() {
   alert("ถอนเงินเรียบร้อย");
 }
 
-function placeBet() {
+window.placeBet = function () {
   const date = document.getElementById("betDate").value;
   const team = document.getElementById("betTeam").value.trim();
   const odd = parseFloat(document.getElementById("betOdd").value);
