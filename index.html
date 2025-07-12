@@ -1,9 +1,10 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>บันทึกการเดิมพันฟุตบอล</title>
+  <title>GET RICH</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -14,8 +15,8 @@
     <h2>เข้าสู่ระบบ</h2>
     <input type="email" id="loginEmail" placeholder="อีเมล" />
     <input type="password" id="loginPassword" placeholder="รหัสผ่าน" />
-    <button onclick="login()">เข้าสู่ระบบ</button>
-    <button onclick="register()">สมัครสมาชิก</button>
+    <button id="loginBtn">เข้าสู่ระบบ</button>
+    <button id="registerBtn">สมัครสมาชิก</button>
     <p id="loginError" class="error-msg"></p>
   </div>
 
@@ -23,12 +24,12 @@
   <div class="container" id="appContainer" style="display:none;">
     <aside id="menu">
       <h2>♠︎♥︎♦︎♣︎♠︎♥︎♦︎♣︎</h2>
-      <button onclick="showPage('deposit')">เติมเงิน</button>
-      <button onclick="showPage('withdraw')">ถอนเงิน</button>
-      <button onclick="showPage('bet')">เดิมพัน</button>
-      <button onclick="showPage('all')">รายการทั้งหมด</button>
-      <button onclick="showPage('summary')">สรุปผล</button>
-      <button onclick="logout()" style="background:#f44336;margin-top:20px;">ออกจากระบบ</button>
+      <button data-page="deposit">เติมเงิน</button>
+      <button data-page="withdraw">ถอนเงิน</button>
+      <button data-page="bet">เดิมพัน</button>
+      <button data-page="all">รายการทั้งหมด</button>
+      <button data-page="summary">สรุปผล</button>
+      <button id="logoutBtn" style="background:#f44336;margin-top:20px;">ออกจากระบบ</button>
     </aside>
 
     <main id="content">
@@ -37,13 +38,13 @@
       <div id="deposit" class="page">
         <h2>เติมเงิน</h2>
         <input type="number" id="depositInput" placeholder="จำนวนเงิน" />
-        <button onclick="deposit()">ยืนยันการเติมเงิน</button>
+        <button id="depositBtn">ยืนยันการเติมเงิน</button>
       </div>
 
       <div id="withdraw" class="page">
         <h2>ถอนเงิน</h2>
         <input type="number" id="withdrawInput" placeholder="จำนวนเงิน" />
-        <button onclick="withdraw()">ยืนยันการถอนเงิน</button>
+        <button id="withdrawBtn">ยืนยันการถอนเงิน</button>
       </div>
 
       <div id="bet" class="page">
@@ -52,7 +53,7 @@
         <label>ทีมที่เดิมพัน <input type="text" id="betTeam" /></label>
         <label>ค่าน้ำ <input type="number" step="0.01" id="betOdd" /></label>
         <label>จำนวนเงินเดิมพัน <input type="number" id="betAmount" /></label>
-        <button onclick="placeBet()">เพิ่มรายการเดิมพัน</button>
+        <button id="placeBetBtn">เพิ่มรายการเดิมพัน</button>
       </div>
 
       <div id="all" class="page">
